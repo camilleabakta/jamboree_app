@@ -1,0 +1,32 @@
+# render.yaml
+# Ce fichier décrit votre application à Render.
+# Il crée un serveur web et une base de données PostgreSQL.
+
+services:
+  # Un service web pour exécuter l'application Django
+  - type: web
+    name: jamboree-app # Le nom de votre application
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --no-input
+      python manage.py migrate
+    startCommand: "gunicorn jamboree_project.wsgi"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jamboree-db # Doit correspondre au nom du service de BDD ci-dessous
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true # Render génère une clé secrète sécurisée pour vous
+      - key: PYTHON_VERSION
+        value: 3.11.4 # Spécifiez une version de Python
+      - key: DEBUG
+        value: False # Toujours False en production
+
+  # Une base de données PostgreSQL gratuite
+  - type: psql
+    name: jamboree-db
+    plan: free # Le plan gratuit de Render
+    # Les données du plan gratuit sont effacées après 90 jours d'inactivité.
+    # Pour un projet réel, passez à un plan payant (ex: 'starter').

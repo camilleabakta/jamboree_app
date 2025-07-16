@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Tableau de Bord Administrateur</h2>
+
+<!-- Cartes de synthèse -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card p-3 text-center">
+            <h5>Total Participants</h5>
+            <p class="display-6 fw-bold">{{ total_participants }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 text-center">
+            <h5>Total Collecté</h5>
+            <p class="display-6 fw-bold">{{ total_collecte|floatformat:0 }} F CFA</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 text-center">
+            <h5>Avancement Global</h5>
+            <div class="progress my-2" style="height: 20px;">
+                <div class="progress-bar" role="progressbar" style="width: {{ pourcentage_global|floatformat:2 }}%;">{{ pourcentage_global|floatformat:2 }}%</div>
+            </div>
+            <small class="text-muted">Objectif: {{ objectif_global|floatformat:0 }} F CFA</small>
+        </div>
+    </div>
+</div>
+
+<!-- Tableau de suivi des participants -->
+<div class="card p-4">
+    <h4>Suivi des Participants</h4>
+    <div class="table-responsive">
+        <table class="table table-hover mt-3">
+            <thead>
+                <tr>
+                    <th>Participant</th>
+                    <th>Email</th>
+                    <th>Total Cotisé (F CFA)</th>
+                    <th>Avancement</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in participants_profiles %}
+                <tr>
+                    <td>{{ profile.user.first_name }} {{ profile.user.last_name }} ({{ profile.user.username }})</td>
+                    <td>{{ profile.user.email }}</td>
+                    <td>{{ profile.total_cotise|floatformat:0 }}</td>
+                    <td>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ profile.pourcentage_avance }}%;">{{ profile.pourcentage_avance }}%</div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Aucun participant inscrit pour le moment.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

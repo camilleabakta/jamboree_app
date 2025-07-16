@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row">
+    <!-- Colonne de gauche : Progrès -->
+    <div class="col-md-5">
+        <div class="card p-4 text-center">
+            <h3>Mon Avancement</h3>
+            <p class="text-muted">Objectif : {{ profile.objectif_cotisation|floatformat:0 }} F CFA</p>
+            <h2 class="display-5 fw-bold">{{ profile.total_cotise|floatformat:0 }} F CFA</h2>
+            
+            <div class="progress my-3" style="height: 25px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                     style="width: {{ profile.pourcentage_avance }}%;" 
+                     aria-valuenow="{{ profile.pourcentage_avance }}" aria-valuemin="0" aria-valuemax="100">
+                     {{ profile.pourcentage_avance }}%
+                </div>
+            </div>
+            <p>Reste à payer : <strong class="text-danger">{{ profile.reste_a_payer|floatformat:0 }} F CFA</strong></p>
+        </div>
+
+        <div class="card p-4 mt-4">
+            <h4>Ajouter une Cotisation</h4>
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-success w-100 mt-3">Ajouter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Colonne de droite : Historique -->
+    <div class="col-md-7">
+        <div class="card p-4">
+            <h4>Historique de mes cotisations</h4>
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Montant (F CFA)</th>
+                        <th>Méthode</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in cotisations %}
+                    <tr>
+                        <td>{{ c.date_paiement|date:"d/m/Y H:i" }}</td>
+                        <td>{{ c.montant|floatformat:0 }}</td>
+                        <td>{{ c.get_methode_paiement_display }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">Aucune cotisation pour le moment.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
