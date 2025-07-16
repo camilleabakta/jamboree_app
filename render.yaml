@@ -1,33 +1,30 @@
 # render.yaml
-# Version corrigée pour le déploiement sur Render
+# Version 3, plus explicite et robuste pour le déploiement sur Render
 
 services:
-  # Un service web pour exécuter l'application Django
+  # 1. Le service de la base de données PostgreSQL
+  - type: psql         # Type officiel pour PostgreSQL
+    name: jamboree-db  # Nom du service de base de données
+    plan: free         # Plan gratuit (attention: effacé après 90j d'inactivité)
+    
+  # 2. Le service web pour l'application Django
   - type: web
-    name: jamboree-app # Le nom de votre application
+    name: jamboree-app
+    plan: free         # Important: spécifier le plan gratuit
     env: python
-    plan: free # Spécifier le plan gratuit pour le service web également
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --no-input
       python manage.py migrate
-    startCommand: "gunicorn jamboree_project.wsgi"
+    startCommand: "gunicorn jamboree_project.wsgi:application"
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: jamboree-db # Doit correspondre au nom du service de BDD ci-dessous
-          property: connectionString
-      - key: SECRET_KEY
-        generateValue: true # Render génère une clé secrète sécurisée pour vous
       - key: PYTHON_VERSION
-        value: 3.11.4 # Assurez-vous que cette version est supportée
+        value: 3.11.4
       - key: DEBUG
         value: False
-
-  # Une base de données PostgreSQL
-  - type: db # <--- CORRECTION ICI. C'est "db" et non "psql"
-    name: jamboree-db
-    databaseName: jamboree_db # Nom interne de la base de données
-    plan: free # Le plan gratuit de Render
-    # Les données du plan gratuit sont effacées après 90 jours d'inactivité.
-    # Pour un projet réel, passez à un plan payant (ex: 'starter').
+      - key: SECRET_KEY
+        generateValue: true # Render génère une clé secrète
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jamboree-db # Doit correspondre au nom du service psql ci-dessus
+          property: connectionString
